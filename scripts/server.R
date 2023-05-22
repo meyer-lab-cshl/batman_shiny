@@ -1,14 +1,8 @@
 function(input, output, session) {
   
   # Combine the selected variables into a new data frame
-  library(R.matlab)
-  library(shiny)
-  library(ggplot2)
-  library(plotly)
-  
 
-  
-  dist_data = readMat("C:/Users/amita/Downloads/epitope_analysis/antigen-availability-master/antigen-availability-master/TCR-crossreactivity//Methods_TCRs_XY.mat")
+  dist_data = readMat("data//Methods_TCRs_XY.mat")
   dist_data=data.frame(dist_data);
   
   nSB = c(13,21,29,35,27,30,15,13)
@@ -24,7 +18,7 @@ function(input, output, session) {
     dist_data[[input$xcol]][[input$ycol]][2,]
   })
   
-  seqs = readMat("C:/Users/amita/Downloads/epitope_analysis/antigen-availability-master/antigen-availability-master/TCR-crossreactivity//epitope_seqs.mat")
+  seqs = readMat("data//epitope_seqs.mat")
   s <- reactive({seqs[[1]][[input$ycol]]})
 
   
@@ -63,3 +57,4 @@ function(input, output, session) {
     })
   
 }
+
