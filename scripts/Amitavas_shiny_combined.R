@@ -54,17 +54,17 @@ server <- function(input, output, session) {
   s <- reactive({seqs[[1]][[input$ycol]]})
   
   
-  d=reactive({data.frame(selectedData1(),selectedData2(),row.names=s())})
+  d = reactive({data.frame(selectedData1(),selectedData2(),row.names=s())})
   
   
-  c1=reactive({rgb(rep(1,nSB[input$ycol]), 0, 0)});
-  c2=reactive({rgb(0,0, rep(1,nNB[input$ycol]))});
+  c1 = reactive({rgb(rep(1,nSB[input$ycol]), 0, 0)});
+  c2 = reactive({rgb(0,0, rep(1,nNB[input$ycol]))});
   
   
-  xmin=reactive({min(dist_data[[input$xcol]][[input$ycol]][1,])})
-  xmax=reactive({max(dist_data[[input$xcol]][[input$ycol]][1,])})
-  ymin=reactive({min(dist_data[[input$xcol]][[input$ycol]][2,])})
-  ymax=reactive({max(dist_data[[input$xcol]][[input$ycol]][2,])}) 
+  xmin = reactive({min(dist_data[[input$xcol]][[input$ycol]][1,])})
+  xmax = reactive({max(dist_data[[input$xcol]][[input$ycol]][1,])})
+  ymin = reactive({min(dist_data[[input$xcol]][[input$ycol]][2,])})
+  ymax = reactive({max(dist_data[[input$xcol]][[input$ycol]][2,])}) 
   
   
   output$plot1 <- renderPlotly({
