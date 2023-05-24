@@ -1,4 +1,4 @@
 *
-!scripts
+!scripts/*
 !.gitignore
 .Rproj.user
