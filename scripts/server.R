@@ -5,20 +5,26 @@ server1 <- function(input, output, session) {
   dist_data = readMat("data//Methods_TCRs_XY.mat")
   dist_data=data.frame(dist_data);
   
+  dist_met <- c("Atchley", "BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM50",
+                "R Contigous")
+  
   nSB = c(13,21,29,35,27,30,15,13)
   nNB = c(72,58,50,51,97,2683,121,146)
   
-  xcol <- reactive(which(dist_met == "input$dist_method"))
+  xcol <- reactive({
+    tmp <- which(dist_met == input$dist_method)
+  })
+    
   
  
   
   selectedData1 <- reactive({
-   dist_data[[xcol]][[input$ycol]][1,]
+   dist_data[[xcol()]][[input$ycol]][1,]
   })
   
   
   selectedData2 <- reactive({
-    dist_data[[xcol]][[input$ycol]][2,]
+    dist_data[[xcol()]][[input$ycol]][2,]
   })
   
   #seqs = readMat("data//epitope_seqs.mat")
@@ -33,10 +39,10 @@ server1 <- function(input, output, session) {
   c2=reactive({rgb(0,0, rep(1,nNB[input$ycol]))});
  
   
-  xmin=reactive({min(dist_data[[xcol]][[input$ycol]][1,])})
-  xmax=reactive({max(dist_data[[xcol]][[input$ycol]][1,])})
-  ymin=reactive({min(dist_data[[xcol]][[input$ycol]][2,])})
-  ymax=reactive({max(dist_data[[xcol]][[input$ycol]][2,])}) 
+  xmin=reactive({min(dist_data[[xcol()]][[input$ycol]][1,])})
+  xmax=reactive({max(dist_data[[xcol()]][[input$ycol]][1,])})
+  ymin=reactive({min(dist_data[[xcol()]][[input$ycol]][2,])})
+  ymax=reactive({max(dist_data[[xcol()]][[input$ycol]][2,])}) 
   
   
   output$plot1 <- renderPlotly({
