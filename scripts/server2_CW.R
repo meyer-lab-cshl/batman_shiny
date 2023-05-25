@@ -58,16 +58,25 @@ server2 <- function(input, output, session) {
   ymax <- reactive({max(dist_data[[xcol()]][[ycol()]][2,])})
   
   
-  output$plot1 <- renderPlotly({
+  output$plot2 <- renderPlot({
     
     ggplot(d(), aes(selectedData1(),selectedData2())) + 
-      geom_point(alpha = 0.6, aes(color = c(c1(), c2()))) +
+      geom_point(alpha = 0.6, size = 3, aes(color = c(c1(), c2()))) +
       scale_color_manual(values = c('blue', 'red'),
-                         labels = c('NB', 'SB')
+                         labels = c('Non Binder', 'Strong Binder')
       ) +
       theme_classic() + 
       labs(color = "Epitope Binding",
            x = "position in X",
            y = "position in y")
      })
+  
+  #sequences <- reactive({row.names(d())
+    #})
+  
+  output$peptide_seq <- renderPrint({
+    req(input$seq_hover)
+    hover = input$seq_hover
+    rownames(d())
+  })
 }
