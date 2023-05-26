@@ -62,7 +62,7 @@ server1 <- function(input, output, session) {
             marker = list(
               color = c(c1(),c2()),
               size = 5,
-              opacity=0.5,
+              opacity=0.4,
               line = list(
                 color = 'rgb(255, 255, 255)',
                 width = 0
@@ -72,7 +72,19 @@ server1 <- function(input, output, session) {
             type = "scatter", mode = "markers",
             hoverinfo = 'text',
             text = ~paste(row.names(d()))
-          )
+             )  %>%
+      layout(xaxis = list(title = 'Distance in x'), 
+             yaxis = list(title = 'Distance in y'), 
+            legend = list(title=list(text='<b> Binding epitopes </b>'))
+            ) %>%
+      add_trace(x = ~selectedData1(), y = ~selectedData2(), 
+                type = "scatter",
+                mode = "markers",
+                name = 'non binder') %>%
+      add_trace(x = ~selectedData1(), y = ~selectedData2(),
+                type = "scatter",
+                mode = "markers",
+                name = 'strong binder')
       
     })
   
