@@ -34,7 +34,7 @@ ui1 <- fluidPage(
                           choices = TCR_name)
               )
            ),
-    column(width = 7,
+    column(width = 9,
            plotlyOutput("plot1")
            )
     ),

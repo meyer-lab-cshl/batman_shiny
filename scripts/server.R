@@ -3,7 +3,7 @@ server1 <- function(input, output, session) {
   # Combine the selected variables into a new data frame. and add lists for distance functions and TCRs
 
   dist_data = readMat("data//Methods_TCRs_XY.mat")
-  dist_data=data.frame(dist_data);
+  dist_data = data.frame(dist_data);
   
   dist_met <- c("Atchley", "BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM50",
                 "R Contigous")
@@ -42,17 +42,17 @@ server1 <- function(input, output, session) {
   s <- reactive({seqs[[1]][[ycol()]]})
 
   
-  d=reactive({data.frame(selectedData1(),selectedData2(),row.names=s())})
+  d = reactive({data.frame(selectedData1(),selectedData2(),row.names=s())})
   
   
-  c1=reactive({rgb(rep(1,nSB[ycol()]), 0, 0)});
-  c2=reactive({rgb(0,0, rep(1,nNB[ycol()]))});
+  c1 = reactive({rgb(rep(1,nSB[ycol()]), 0, 0)});
+  c2 = reactive({rgb(0,0, rep(1,nNB[ycol()]))});
  
   
-  xmin=reactive({min(dist_data[[xcol()]][[ycol()]][1,])})
-  xmax=reactive({max(dist_data[[xcol()]][[ycol()]][1,])})
-  ymin=reactive({min(dist_data[[xcol()]][[ycol()]][2,])})
-  ymax=reactive({max(dist_data[[xcol()]][[ycol()]][2,])}) 
+  xmin = reactive({min(dist_data[[xcol()]][[ycol()]][1,])})
+  xmax = reactive({max(dist_data[[xcol()]][[ycol()]][1,])})
+  ymin = reactive({min(dist_data[[xcol()]][[ycol()]][2,])})
+  ymax = reactive({max(dist_data[[xcol()]][[ycol()]][2,])}) 
   
   
   output$plot1 <- renderPlotly({
@@ -62,29 +62,31 @@ server1 <- function(input, output, session) {
             marker = list(
               color = c(c1(),c2()),
               size = 5,
-              opacity=0.4,
+              opacity=0.5,
               line = list(
                 color = 'rgb(255, 255, 255)',
                 width = 0
               )
             ),
             
-            type = "scatter", mode = "markers",
+            type = "scatter", 
+            mode = "markers",
+            name = "binding Epitopes",
             hoverinfo = 'text',
             text = ~paste(row.names(d()))
              )  %>%
       layout(xaxis = list(title = 'Distance in x'), 
              yaxis = list(title = 'Distance in y'), 
-            legend = list(title=list(text='<b> Binding epitopes </b>'))
-            ) %>%
-      add_trace(x = ~selectedData1(), y = ~selectedData2(), 
-                type = "scatter",
-                mode = "markers",
-                name = 'non binder') %>%
-      add_trace(x = ~selectedData1(), y = ~selectedData2(),
-                type = "scatter",
-                mode = "markers",
-                name = 'strong binder')
+            legend = list(title=list(text='Binding epitopes'))
+            ) #%>%
+      #add_trace(x = ~selectedData1(), y = ~selectedData2(), 
+                #type = "scatter",
+                #mode = "markers",
+                #name = 'non binder') %>%
+      #add_trace(x = ~selectedData1(), y = ~selectedData2(),
+                #type = "scatter",
+                #mode = "markers",
+                #name = 'strong binder')
       
     })
   
