@@ -11,7 +11,7 @@ names(dist_data) <- gsub("(.*)XY$", "\\1", names(dist_data))
 
 
 # define function to extract distances for all epitopes for one TCR and distance funtion
-## index corresponds to the chosen distance function (1 = Atchles, 2 = BLOSUM100, etc.)
+## index corresponds to the chosen distance function (1 = Atchley, 2 = BLOSUM100, etc.)
 
 tcr_epitope_table <- function(index, dist_data){
   picked_tcr <- dist_data[[index]]
@@ -24,6 +24,7 @@ tcr_epitope_table <- function(index, dist_data){
     t %>% 
     as_tibble %>%
     mutate(tcr=tcr_name)
+ picked_tcr$epitope <- paste0(1:nrow(picked_tcr)) #add column with the number of epitopes
   
   return(picked_tcr)
 }
@@ -43,5 +44,21 @@ all_tcrs <- lapply(seq_along(dist_data), function(distfn_index) {
   bind_rows
 
 
+## create df for information about SB/NB (everything else na)
 
+epitope_binder <- data.frame(SB = sort(c(13,21,29,35,27,30,15, NA), na.last = TRUE), 
+                             NB = sort(c(72,58,50,51,97,2683,121,146))
+                             )
 
+##subset try to match binder information to epitope numbers
+
+Atchley_tcr868 <- all_tcrs[1:85, ]
+
+#Atchley_tcr868$binder <- epitope_binder$SB[match(Atchley_tcr868$epitope,epitope_binder$SB)]
+
+if(epitope_binder$SB[match(Atchley_tcr868$epitope,epitope_binder$SB)]){
+  Atchley_tcr868$binder <- 'SB'
+} else if(epitope_binder$NB[match(Atchley_tcr868$epitope,epitope_binder$NB)]){
+  Atchley_tcr868$binder <- 'NB'
+}else{
+  Atchley_tcr868$binder <- NA}
