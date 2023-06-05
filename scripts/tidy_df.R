@@ -44,21 +44,20 @@ all_tcrs <- lapply(seq_along(dist_data), function(distfn_index) {
   bind_rows
 
 
-## create df for information about SB/NB (everything else na)
+#Add information about binders to new data frame
 
-epitope_binder <- data.frame(SB = sort(c(13,21,29,35,27,30,15, NA), na.last = TRUE), 
-                             NB = sort(c(72,58,50,51,97,2683,121,146))
-                             )
+## create lists for binding information (SB = strong binder, NB = non binder)
+nSB = c(13,21,29,35,27,30,15,13)
+nNB = c(72,58,50,51,97,2683,121,146)
 
-##subset try to match binder information to epitope numbers
+##add empty column about binding info to tcrs data frame
+all_tcrs[ ,'binder'] <- NA
 
-Atchley_tcr868 <- all_tcrs[1:85, ]
-
-#Atchley_tcr868$binder <- epitope_binder$SB[match(Atchley_tcr868$epitope,epitope_binder$SB)]
-
-if(epitope_binder$SB[match(Atchley_tcr868$epitope,epitope_binder$SB)]){
-  Atchley_tcr868$binder <- 'SB'
-} else if(epitope_binder$NB[match(Atchley_tcr868$epitope,epitope_binder$NB)]){
-  Atchley_tcr868$binder <- 'NB'
-}else{
-  Atchley_tcr868$binder <- NA}
+##loop over all_tcrs to add binding information; might not be the most efficent for bigger df's.
+for (i in 1:nrow(all_tcrs)){
+  if (all_tcrs$epitope[i] %in% nSB){
+    all_tcrs$binder[i] <- 'SB'
+  } else if (all_tcrs$epitope[i] %in% nNB){
+    all_tcrs$binder[i] <- 'NB'
+  }
+}
