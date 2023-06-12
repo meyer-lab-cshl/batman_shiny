@@ -25,7 +25,7 @@ tcr_epitope_table <- function(index, dist_data){
     as_tibble %>%
     mutate(tcr=tcr_name)
  
- picked_tcr$epitope <- paste0(1:nrow(picked_tcr)) #add column with the number of epitopes
+ picked_tcr$epitope <- 1:nrow(picked_tcr) #add column with the number of epitopes
   
   return(picked_tcr)
 }
@@ -63,6 +63,11 @@ for (i in 1:nrow(all_tcrs)){
   }
 }
 
+#easier way in R programming
+# tmp$binder <- 'Weak binder'
+# tmp$binder[tmp$epitope %in% nSB] <- 'Strong Binder'
+# tmp$binder[tmp$epitope %in% nNB] <- 'Non-Binder'
+
 #safe new all_tcrs data frame
 save(all_tcrs, file = "All_TCRs_epitopes.Rda")
 
@@ -71,9 +76,9 @@ save(all_tcrs, file = "All_TCRs_epitopes.Rda")
 #load sequence list
 seqs = readMat("data//epitope_seqs.mat")
 
-# epitope_seq <- data.frame(seqs) %>%
-#   t
-# 
+epitope_seq <- data.frame(seqs) %>%
+  t
+ 
 # df1 <- data.frame()
 # 
 # epitope_seq1 <- lapply(seq_along(epitope_seq), function(tcr_index){
@@ -99,39 +104,28 @@ seqs = readMat("data//epitope_seqs.mat")
 
 ##new try of adding column containing sequences to all_tcrs
 
-get_tcr_seq <- function(list_position){
-  
+get_tcr_seq <- function(list_position, epitope_seq){
+  cat(list_position)
   Epitope_Seq <- epitope_seq[ , list_position] %>%
     unlist
   Epitope_Seq <- data.frame(Epitope_Seq)
   
+  TCR_name <- colnames(epitope_seq)[list_position]
+  
   Epitope_Seq <- Epitope_Seq %>%
-    mutate(tcr = colnames(epitope_seq)[list_position]) %>%
+    mutate(tcr = TCR_name) %>%
     mutate(epitope = 1:n())
   
   return(Epitope_Seq)
   
 }
 
-#epitope_seqs_df <- lapply(list(1:8), get_tcr_seq)
+epitope_seqs_df <- lapply(c(1:8), get_tcr_seq, epitope_seq) %>%
+  bind_rows()
 
-#ugly manual version
+names(epitope_seqs_df)[names(epitope_seqs_df) == "Epitope_Seq"] <- "Sequence"
 
-df_tcr868 <- get_tcr_seq(1)
-df_tcrA42 <- get_tcr_seq(2)
-df_tcrA6 <- get_tcr_seq(3)
-df_tcrB7 <- get_tcr_seq(4)
-df_tcrE7NLV <- get_tcr_seq(5)
-df_tcrG10 <- get_tcr_seq(6)
-df_tcrILA1 <- get_tcr_seq(7)
-df_tcrT5004 <- get_tcr_seq(8)
-
-epitope_seqs_df <- rbind(df_tcr868, df_tcrA42, df_tcrA6, df_tcrB7, 
-                         df_tcrE7NLV, df_tcrG10, df_tcrILA1, df_tcrT5004)
 
 all_tcrs <- all_tcrs %>%
-  left_join(epitope_seqs_df, join_by(tcr == tcr, epitope == epitope))
-#Error in `left_join()`:
-# ! Can't join `x$epitope` with `y$epitope` due to incompatible types.
-# ℹ `x$epitope` is a <character>.
-# ℹ `y$epitope` is a <integer>.
+  inner_join(epitope_seqs_df)
+
