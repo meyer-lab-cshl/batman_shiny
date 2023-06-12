@@ -2,7 +2,9 @@
 
 library(R.matlab)
 library(tidyr)
+library(plyr)
 library(dplyr)
+
 
 ##load data, set names to distance functions
 
@@ -15,7 +17,7 @@ names(dist_data) <- gsub("(.*)XY$", "\\1", names(dist_data))
 
 tcr_epitope_table <- function(index, dist_data){
   picked_tcr <- dist_data[[index]]
-  tcr_name <- dimnames(dist_data)[[1]][[index]]
+  tcr_name <- dimnames(dist_data)[[1]][[index]] 
    
   rownames(picked_tcr) <- c('x', 'y')
   colnames(picked_tcr) <- paste0(1:ncol(picked_tcr))
@@ -23,7 +25,7 @@ tcr_epitope_table <- function(index, dist_data){
  picked_tcr <-  picked_tcr %>%
     t %>% 
     as_tibble %>%
-    mutate(tcr=tcr_name)
+    mutate(tcr = tcr_name)
  
  picked_tcr$epitope <- 1:nrow(picked_tcr) #add column with the number of epitopes
   
@@ -73,35 +75,11 @@ save(all_tcrs, file = "All_TCRs_epitopes.Rda")
 
 ##add column with epitope sequences
 
-#load sequence list
-seqs = readMat("data//epitope_seqs.mat")
+seqs = readMat("data//epitope_seqs.mat") #load sequence list
 
 epitope_seq <- data.frame(seqs) %>%
   t
  
-# df1 <- data.frame()
-# 
-# epitope_seq1 <- lapply(seq_along(epitope_seq), function(tcr_index){
-#   
-#   tcr <- epitope_seq[ , tcr_index] %>%
-#     unlist
-#   
-#   df1$colnames(tcr) <- data.frame(tcr)
-#   
-#   
-#   return(df1)
-#   })
-# 
-# tmd_868 <- tmd[ , 1] %>%
-#   unlist
-# 
-# tmd_test <- seqs[ , 1] %>%
-#   unlist
-# 
-# df1 <- data.frame(tmd_868)
-# 
-# df1$col.name(tcr)
-
 ##new try of adding column containing sequences to all_tcrs
 
 get_tcr_seq <- function(list_position, epitope_seq){
@@ -128,4 +106,3 @@ names(epitope_seqs_df)[names(epitope_seqs_df) == "Epitope_Seq"] <- "Sequence"
 
 all_tcrs <- all_tcrs %>%
   inner_join(epitope_seqs_df)
-

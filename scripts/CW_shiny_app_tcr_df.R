@@ -23,11 +23,11 @@ ui3 <- fluidPage(
   fluidRow(
     column(width = 9,
            sidebarPanel(
-             selectInput('dist_method', 'Method',
-                         choices = all_tcrs$dist),
+             selectizeInput('dist_method', 'Method',
+                         choices = unique(all_tcrs$dist)),
              
-             selectInput('TCR_names', 'TCR',
-                         choices = all_tcrs$tcr)
+             selectizeInput('TCR_names', 'TCR',
+                         choices = unique(all_tcrs$tcr))
            )
     ),
     column(width = 9,
