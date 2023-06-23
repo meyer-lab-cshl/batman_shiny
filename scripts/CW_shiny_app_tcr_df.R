@@ -74,12 +74,5 @@ server3 <- function(input, output, session) {
            y = "relative position in y")
     ggplotly(tooltip = c("color", "label"))
   })
-
-  
-  # output$peptide_seq <- renderPrint({
-  #   req(input$seq_hover)
-  #   hover = input$seq_hover
-  #   str(subset_tcrs$Epitope_Seq)
-  # })
 }
 

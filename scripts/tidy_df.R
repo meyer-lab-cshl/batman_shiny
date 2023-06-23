@@ -106,3 +106,5 @@ names(epitope_seqs_df)[names(epitope_seqs_df) == "Epitope_Seq"] <- "Sequence"
 
 all_tcrs <- all_tcrs %>%
   inner_join(epitope_seqs_df)
+
+save(all_tcrs, file = "All_TCRs_epitopes.Rda")
