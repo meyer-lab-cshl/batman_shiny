@@ -3,10 +3,12 @@
 library(readxl)
 library(ggplot2)
 library(ggsankey)
+library(ggalluvial)
 library(reshape2)
 library(dplyr)
 library(devtools)
 library(ComplexHeatmap)
+library(InteractiveComplexHeatmap)
 library(tidyr)
 library(tidyverse)
 library(circlize)
@@ -34,6 +36,9 @@ amitavas_df$position <- mapply(function(x, y) which(x != y)[1],
                                strsplit(amitavas_df$index_peptide, "")) %>%
   replace_na(0)
 
+#Safe df for further use
+save(amitavas_df, file = "TCR_Epitope_activity.Rda")
+write.csv(amitavas_df, "TCR_Epitope_activity.csv")
 
 #subset Amitavas df to one peptide
 amitavas_df_SIN <- amitavas_df[amitavas_df$index_name == 'OVA257-264 (SIINFEKL)', ]
@@ -56,8 +61,8 @@ wide_SIN_df <- pivot_wider(smaller_SIN_df,
                            id_cols = c("peptide", "position"),
                            names_from = "tcr_name", 
                            values_from = "normalized_peptide_activity") %>%
-  column_to_rownames(., var = 'peptide') %>% #set peptides as row IDs
-  as.matrix() #Hatmap function needs matrix as input
+  column_to_rownames(., var = 'peptide') #set peptides as row IDs
+
   
 
 #Set color squeme
@@ -70,11 +75,49 @@ ha = rowAnnotation(foo = anno_simple(1:20,
                    annotation_name_side = 'right')
 
 
-Heatmap(wide_SIN_df[, 2:ncol(wide_SIN_df)], 
+Heatmap(as.matrix(wide_SIN_df[, 2:ncol(wide_SIN_df)]), 
         name = "normalized peptide activity", 
         col = col_fun, 
         cluster_rows = FALSE,
         show_row_names = FALSE,
-        row_split = wide_SIN_df[ ,1])
+        row_split = wide_SIN_df[ ,1], 
+        row_title_rot = 0,
+        column_names_rot = 45
+        )
 
+#try to make sankey plot
+
+tcr_sankey <- TCR_epitope[ ,c("tcr_name", "peptide", "index_name",
+                              "index_peptide_activity", "normalized_peptide_activity", "peptide_activity")]
+
+tcr_sankey_INS <- tcr_sankey[tcr_sankey$index_name == 'Insulin (ALWGPDPAAA)', ]
+tcr_sankey_CMV <- tcr_sankey[tcr_sankey$index_name == 'CMV pp65 (NLVPMVATV)', ]
+tcr_sankey_GAG <- tcr_sankey[tcr_sankey$index_name == 'Gag180–188 (TPQDLNTML)', ]
+tcr_sankey_SIN <- tcr_sankey[tcr_sankey$index_name == 'OVA257-264 (SIINFEKL)', ]
+
+
+ggplot(tcr_sankey_INS, aes(x = tcr_name, 
+               next_x = peptide, 
+               node = peptide_activity, 
+               next_node = peptide_activity,
+               fill = factor(peptide_activity),
+               label = peptide_activity)) +
+  geom_sankey() +
+  geom_sankey_label() +
+  theme_sankey(base_size = 16)
+
+tcr_sankey_INS_small <- filter(tcr_sankey_INS, normalized_peptide_activity > 0.5)
+tcr_sankey_CMV_small <- filter(tcr_sankey_CMV, normalized_peptide_activity > 0.5)
+tcr_sankey_GAG_small <- filter(tcr_sankey_GAG, normalized_peptide_activity > 1.25)
+tcr_sankey_SIN_small <- filter(tcr_sankey_SIN, normalized_peptide_activity > 2)
+
+ggplot(data = TCR_epitope,
+       aes(axis1 = tcr_name, axis2 = index_peptide, y = normalized_peptide_activity)) +
+  geom_alluvium(aes(fill = tcr_name), curve_type = "cubic") +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("tcr_name", "index_peptide"),
+                   expand = c(0.15, 0.05)) +
+  theme_void()
 
