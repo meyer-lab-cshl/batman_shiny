@@ -4,6 +4,7 @@ library(shiny)
 library(readxl)
 library(ggplot2)
 library(plotly)
+library(heatmaply)
 library(ggsankey)
 library(ggalluvial)
 library(reshape2)
@@ -17,6 +18,8 @@ library(circlize)
 
 #load in data frame
 TCR_epitope <- read_csv("TCR_Epitope_activity.csv")
+TCR_epitope_distinct <- TCR_epitope %>% 
+                       distinct(tcr_name, peptide, .keep_all = TRUE)
 
 
 #create ui for Heatmap
@@ -37,6 +40,7 @@ ui4 <- fluidPage(
     ),
     column(width = 9,
            InteractiveComplexHeatmapOutput()
+           #plotOutput('plot6')
     )
   ),
 )
@@ -54,11 +58,13 @@ ui5 <- fluidPage(
              selectizeInput('peptide', 'Peptide',
                             choices = unique(TCR_epitope$index_name)),
              
-             numericInput('activity', "threshold normalized binding activity", value = 2, min = 0, max = 15, step = 0.5)
+            sliderInput('activity', "normalized binding activity range", value = c(2, 15), 
+                        min = 0, max = 15, step = 0.5)
            )
     ),
     column(width = 12,
-           plotlyOutput("plot5"), 
+           plotlyOutput("plot5")
+           #tableOutput('table5')
     )
   ),
 )

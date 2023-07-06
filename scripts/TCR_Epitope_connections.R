@@ -75,15 +75,20 @@ ha = rowAnnotation(foo = anno_simple(1:20,
                    annotation_name_side = 'right')
 
 
-Heatmap(as.matrix(wide_SIN_df[, 2:ncol(wide_SIN_df)]), 
+heatmaply(as.matrix(wide_SIN_df[, 2:ncol(wide_SIN_df)]), 
         name = "normalized peptide activity", 
-        col = col_fun, 
-        cluster_rows = FALSE,
-        show_row_names = FALSE,
-        row_split = wide_SIN_df[ ,1], 
+        col = col_fun,
+        scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(
+          low = "white", high = "red", 
+          limits = c(min(smaller_SIN_df$normalized_peptide_activity),
+                    max(smaller_SIN_df$normalized_peptide_activity))),
+        Rowv = FALSE,
+        showticklabels = c(TRUE, FALSE),
+        row_side_colors = wide_SIN_df$position,
         row_title_rot = 0,
-        column_names_rot = 45
+        column_text_angle = 45
         )
+        
 
 #try to make sankey plot
 
@@ -109,15 +114,16 @@ ggplot(tcr_sankey_INS, aes(x = tcr_name,
 tcr_sankey_INS_small <- filter(tcr_sankey_INS, normalized_peptide_activity > 0.5)
 tcr_sankey_CMV_small <- filter(tcr_sankey_CMV, normalized_peptide_activity > 0.5)
 tcr_sankey_GAG_small <- filter(tcr_sankey_GAG, normalized_peptide_activity > 1.25)
-tcr_sankey_SIN_small <- filter(tcr_sankey_SIN, normalized_peptide_activity > 2)
+tcr_sankey_SIN_small <- filter(tcr_sankey_SIN, between(normalized_peptide_activity, 5, 15))
 
-ggplot(data = TCR_epitope,
-       aes(axis1 = tcr_name, axis2 = index_peptide, y = normalized_peptide_activity)) +
-  geom_alluvium(aes(fill = tcr_name), curve_type = "cubic") +
-  geom_stratum() +
+ggplot(data = tcr_sankey_SIN_small,
+       aes(axis1 = tcr_name, axis2 = peptide, y = normalized_peptide_activity)) +
+  geom_alluvium(aes(fill = peptide), curve_type = "cubic") +
+  geom_stratum(aes(fill = peptide)) +
   geom_text(stat = "stratum",
             aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("tcr_name", "index_peptide"),
+  scale_x_discrete(limits = c("tcr_name", "peptide"),
                    expand = c(0.15, 0.05)) +
-  theme_void()
-
+  theme_void() +
+  guides(fill = guide_legend(title = "Epitope"))
+  
