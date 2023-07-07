@@ -16,8 +16,9 @@ library(tidyr)
 library(tidyverse)
 library(circlize)
 
+
 #load in data frame
-TCR_epitope <- read_csv("TCR_Epitope_activity.csv")
+TCR_epitope <- read_csv("TCR_Epitope_activity_updated.csv")
 
 
 
@@ -155,32 +156,43 @@ server5 <- function(input, output, session) {
      dplyr::filter((between(normalized_peptide_activity, 
                             input$activity[1], input$activity[2])))
                                 })
+ # conditionalPanel(
+ #   condition = nrow(TCR_epitope_peptide()) == 0,
+ #   output$warning <- renderPrint({
+ #       "There are no epitopes with an activity within your input range, please choose a smaller lower boundary"
+ #   })
+ # )
  
- 
+ # output$warning <- renderUI({
+ #   if (nrow(TCR_epitope_peptide()) == 0) {
+ #     text("Oops, there is no data for epitopes within your selected activity range", col = 'red' ) 
+ #   }
+ # })
+   
   output$plot5 <- renderPlotly({
     
-    ggplot(data = TCR_epitope_peptide(),
+    if (nrow(TCR_epitope_peptide()) == 0) {
+      ggplot() +
+        theme_void() +
+        theme(axis.line=element_blank()) +
+        ggtitle("Oops, there is no data for epitopes within your selected activity range")
+      
+    } else {
+    
+    plot_5 <- ggplot(data = TCR_epitope_peptide(),
            aes(axis1 = tcr_name, axis2 = peptide, y = normalized_peptide_activity)) +
       geom_alluvium(aes(fill = tcr_name), curve_type = "cubic") +
       geom_stratum(aes(fill = tcr_name)) +
       geom_text(stat = "stratum",
                 aes(label = after_stat(stratum))) +
       scale_x_discrete(limits = c("tcr_name", "peptide"),
-                       expand = c(0.15, 0.05)) +
+                       expand = c(0.25, 0.15)) +
       theme_void() +
       guides(fill = guide_legend(title = "TCRs"))
 
-    ggplotly()
+    ggplotly(plot_5, , height = 750, width = 1000)
+    }
     
   })
-  
-  output$warning <- renderPrint({
-    if (nrow(TCR_epitope_peptide()) == 0 ) { 
-   "There are no epitopes with an activity within your input range, please choose a smaller lower boundary"
-   } else {
-   "" 
-   }
-    
-   })
 }
  

@@ -15,7 +15,7 @@ library(circlize)
 
 
 #load in data frame
-amitavas_df <- read_excel("data/TCR_epitope_database.xlsx")
+amitavas_df <- read_excel("data/TCR_epitope_database_updated.xlsx")
 
 #add column with Epitope names to df, make more efficient version!
 amitavas_df$index_name <- NA
@@ -37,8 +37,8 @@ amitavas_df$position <- mapply(function(x, y) which(x != y)[1],
   replace_na(0)
 
 #Safe df for further use
-save(amitavas_df, file = "TCR_Epitope_activity.Rda")
-write.csv(amitavas_df, "TCR_Epitope_activity.csv")
+save(amitavas_df, file = "TCR_Epitope_activity_updated.Rda")
+write.csv(amitavas_df, "TCR_Epitope_activity_updated.csv")
 
 #subset Amitavas df to one peptide
 amitavas_df_SIN <- amitavas_df[amitavas_df$index_name == 'OVA257-264 (SIINFEKL)', ]
@@ -111,7 +111,7 @@ ggplot(tcr_sankey_INS, aes(x = tcr_name,
   geom_sankey_label() +
   theme_sankey(base_size = 16)
 
-tcr_sankey_INS_small <- filter(tcr_sankey_INS, normalized_peptide_activity > 0.5)
+tcr_sankey_INS_small <- filter(tcr_sankey_INS, normalized_peptide_activity > 3.5)
 tcr_sankey_CMV_small <- filter(tcr_sankey_CMV, normalized_peptide_activity > 0.5)
 tcr_sankey_GAG_small <- filter(tcr_sankey_GAG, normalized_peptide_activity > 1.25)
 tcr_sankey_SIN_small <- filter(tcr_sankey_SIN, between(normalized_peptide_activity, 5, 15))
