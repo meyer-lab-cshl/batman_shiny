@@ -4,6 +4,10 @@ library(R.matlab)
 library(tidyr)
 library(plyr)
 library(dplyr)
+library(readxl)
+library(readr)
+library(writexl)
+
 
 
 ##load data, set names to distance functions
@@ -108,3 +112,45 @@ all_tcrs <- all_tcrs %>%
   inner_join(epitope_seqs_df)
 
 save(all_tcrs, file = "All_TCRs_epitopes.Rda")
+
+
+
+
+## Normalizing peptide binding activity 
+
+TCR_data <- read_csv("TCR_Epitope_activity_updated.csv")
+
+
+normalize_activity_func <- function(index_position, df){
+  
+  # Extract TCR names present in the data
+  TCR_names <- unique(TCR_data$tcr_name)
+  
+  # Extract peptides and their normalized activities for a particular TCR
+  peptide_list <- TCR_data$peptide[TCR_data$tcr_name == TCR_names[index_position]]
+  
+  peptide_activity <- TCR_data$peptide_activity[TCR_data$tcr_name == TCR_names[index_position]]
+  
+  index_peptide <- TCR_data$peptide[TCR_data$tcr_name == 
+                                    TCR_names[index_position]][which.max(peptide_activity)]
+  
+  normalized_activity_list <- peptide_activity / (peptide_activity[which.max(peptide_activity)])
+  
+  return(normalized_activity_list)
+  
+}
+
+
+normalized_activity <- lapply(c(1:length(unique(TCR_data$tcr_name))), 
+                                  normalize_activity_func, TCR_data) %>%
+  unlist %>%
+  as.tibble()
+  
+TCR_data <- bind_cols(TCR_data, normalized_activity)
+
+names(TCR_data)[names(TCR_data) == "value"] <- "normalized_activity"
+
+save(TCR_data, file = "TCR_Epitope_Activity_updated.Rda")
+write.csv(TCR_data, "TCR_Epitope_Activity_updated.csv")
+write_xlsx(TCR_data, "data/TCR_Epitope_activity_updated.xlsx")
+

@@ -64,7 +64,7 @@ ui5 <- fluidPage(
            )
     ),
     column(width = 12,
-           plotlyOutput("plot5")
+           plotlyOutput("plot5", inline = FALSE)
            #uiOutput('warning')
     )
   ),
