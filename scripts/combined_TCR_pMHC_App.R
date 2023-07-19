@@ -14,7 +14,10 @@ library(tidyverse)
 library(circlize)
 library(igraph)
 
+# load dataframe for TCR distances and epitope binding information
+all_tcrs <- read_xlsx("data/TCR_Epitope_activity_updated.xlsx")
 TCR_epitope <- read_csv("TCR_Epitope_activity_updated.csv")
+dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 
 
 ## Load Browser functions and annotations ####
@@ -43,7 +46,40 @@ ui <- shinyUI(
               
                       selectizeInput('TCR_names', 'TCR',
                       choices = unique(all_tcrs$tcr_name)
-                    ))),
+                    )),
+                  box(
+                    sliderInput("obs1", "P1",
+                                    min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs2", "P2",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs3", "P3",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs4", "P4",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs5", "P5",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    )),
+                  box(
+                    sliderInput("obs6", "P6",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs7", "P7",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs8", "P8",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs9", "P9",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    ),
+                    sliderInput("obs10", "P10",
+                                min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
+                    )
+                   )),
                   box(plotlyOutput("plot3.1"))),
                   
       tabItem(tabName = 'heatmap', 
@@ -80,7 +116,7 @@ server <- shinyServer(function(input, output, session){
   ##Everything for the distance functions
   peptide <- reactive({all_tcrs$peptide[all_tcrs$tcr_name == input$TCR_names]})
   
-  generate_epitope_coordinates <- function(peptide_list, distance_metric){
+  generate_epitope_coordinates <- function(peptide_list, distance_metric, weights){
     
     # Load Amino Acid distance matrix
     load(paste("data/", distance_metric, ".rda", sep = ""))
@@ -106,19 +142,27 @@ server <- shinyServer(function(input, output, session){
             unlist(strsplit(peptide_list[peptide2], split = ""))[position]
           ]
         }
-        epitope_adjacency_matrix[peptide1,peptide2] <- sum(position_dependent_distances)
+        epitope_adjacency_matrix[peptide1,peptide2] <- 1/(1+position_dependent_distances%*%weights)
         #Add position-dependent distances to get total distance
       }
     }
+    set.seed(100)
     epitope_coordinates <- layout_with_fr(
-      graph_from_adjacency_matrix(epitope_adjacency_matrix, weighted = TRUE)
+      graph_from_adjacency_matrix(epitope_adjacency_matrix, weighted = TRUE),niter=5000
     )
     #Output array of dims #peptides X 2
     return(epitope_coordinates)
   }
   
+  peptide_length<-reactive({length(unlist(strsplit(peptide(), split = "")))/length(peptide())})
+  
+  weights <- reactive({
+    array(c(input$obs1, input$obs2, input$obs3, input$obs4, input$obs5, input$obs6, 
+            input$obs7, input$obs8, input$obs9, input$obs10),
+          dim = c(peptide_length(),1))})
+
   coordinates <- reactive({as.data.frame(generate_epitope_coordinates(peptide(), 
-                                                                      input$dist_method))})
+                                                                      input$dist_method,weights()))})
   
   activity <- reactive({all_tcrs$normalized_activity[all_tcrs$tcr_name == 
                                                        input$TCR_names]})
@@ -221,7 +265,7 @@ server <- shinyServer(function(input, output, session){
         theme_void() +
         guides(fill = guide_legend(title = "TCRs"))
       
-      ggplotly(plot_5, , height = 750, width = 1000)
+      ggplotly(plot_5, height = 750, width = 1000)
     }
     
   })
