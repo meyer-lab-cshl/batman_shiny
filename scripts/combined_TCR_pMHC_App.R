@@ -5,18 +5,15 @@ library(readxl)
 library(ggplot2)
 library(plotly)
 library(ggalluvial)
-library(reshape2)
 library(dplyr)
-library(devtools)
-library(InteractiveComplexHeatmap)
-library(tidyr)
 library(tidyverse)
+library(InteractiveComplexHeatmap)
 library(circlize)
 library(igraph)
 
 # load dataframe for TCR distances and epitope binding information
 all_tcrs <- read_xlsx("data/TCR_Epitope_activity_updated.xlsx")
-TCR_epitope <- read_csv("TCR_Epitope_activity_updated.csv")
+TCR_epitope <- read.csv("TCR_Epitope_activity_updated.csv")
 dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 
 
@@ -27,27 +24,38 @@ dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 ui <- shinyUI(
   dashboardPage(
     dashboardHeader(title = 'TCR-pMHC Binding'),
-    dashboardSidebar(
+    dashboardSidebar( width = 250,
       sidebarMenu(
       menuItem('About', tabName = 'about'),
-      menuItem('Activity clusters - Distance functions', tabName = 'distances'),
+      menuItem('Epitope Cluster', tabName = 'distances'),
       menuItem('Activity Heatmap', tabName = 'heatmap'),
-      menuItem('TCR_pMHC mutation interactions', tabName = 'alluvium')
+      menuItem('Mutant-TCR interaction', tabName = 'alluvium')
     )),
     dashboardBody(
       tabItems(
-        tabItem(tabName = 'about'),
+        tabItem(tabName = 'about', 
+        "This application explores the vast diversity of T-cell receptor (TCR) interaction with antigens, based on their epitopes. TCR expression in human T-cells results from the somatic recombination of V and J genes. This process leads to a theoretically extensive repertoire of TCRs that could potentially recognize various antigens from pathogens. However, even with this theoretical diversity, the human immune system would still not be able to create an immune response against every possible pathogen. To overcome this limitation, T-cells are believed to be cross-reactive, meaning that a single T-cell can recognize many different peptides presented on MHC molecules, according to experimental extrapolations up to 10e6 different peptides.  The same antigens can also be recognized by multiple TCRs, based on distinct antigen features. This cross-reactivity is critical for providing an adequate immune response to different pathogens.
+                However, while cross-reactivity is favorable in immune responses against pathogens, it can also have unintended consequences. For instance, it may play a role in the development of auto-immune diseases, or it can lead to off-target effects in cancer immunotherapies.
+                The app visualizes the cross-reactivity of 48 TCRs to 5 specific index peptides and all possible single mutations of these peptides. The Epitope Cluster function clusters mutated epitopes according to their mutual sequence similarities, while showing their binding affinity. This information is based on user-defined distance functions and weights assigned to mutations at specific positions within the peptides.
+                The Activity Heatmap in the app allows users to visualize the normalized binding activity of each TCR to different peptides. On the other hand, the Mutant-TCR interaction tab reveals which index peptides and their mutations are bound by multiple TCRs and which are recognized by only one TCR, emphasizing how different TCRs specific for the same index peptide recognizes different mutants of it differently.
+                In summary, this application provides valuable insights into the cross-reactivity of TCRs and how it influences the immune response to various antigens."
+        ),
         
         tabItem(tabName = 'distances', 
-                h1('Epitope activity by diferent distance functions'),
+                h1('Epitope similarity by diferent distance functions'),
                 fluidRow(
-                  box(selectizeInput('dist_method', 'Method',
+                  
+                  box(width = 5, title = "Settings", status = 'info', solidHeader = T,
+                      
+                      selectizeInput('dist_method', 'Method',
                       choices = dist_met),
               
                       selectizeInput('TCR_names', 'TCR',
-                      choices = unique(all_tcrs$tcr_name)
-                    )),
-                  box(
+                      choices = unique(all_tcrs$tcr_name))
+                    ),
+                  
+                  box(width = 3, title = "Position weights", status = 'info', solidHeader = T,
+                      
                     sliderInput("obs1", "P1",
                                     min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
                     ),
@@ -62,8 +70,11 @@ ui <- shinyUI(
                     ),
                     sliderInput("obs5", "P5",
                                 min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
-                    )),
-                  box(
+                    )
+                  ),
+                  
+                  box(width = 3, title = " ", status = 'info', solidHeader = T,
+                      
                     sliderInput("obs6", "P6",
                                 min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
                     ),
@@ -79,34 +90,51 @@ ui <- shinyUI(
                     sliderInput("obs10", "P10",
                                 min = 0, max = 1, value = 0.5, step=0.1, ticks= FALSE
                     )
-                   )),
-                  box(plotlyOutput("plot3.1"))),
+                  )
+                ),
+                
+                fluidRow(
+                  box(width = 12, title = "Peptide Distances", status = 'primary', solidHeader = T,
+                    plotlyOutput("plot3.1"))
+                  )
+                ),
                   
       tabItem(tabName = 'heatmap', 
               h1('TCR-pMHC normalized binding activity heatmap'),
+              
               fluidRow(
-                box(selectizeInput('peptide', 'Peptide',
+                box(width = 5, title = "Settings", status = 'info', solidHeader = T,
+                     selectizeInput('peptide1', 'Peptide',
                                     choices = unique(TCR_epitope$index_name))
-                         #choice which peptide/epitope (by trivial name) is displayed
-                         #possible addidtion of choice by publication
-                       )),
-                box(InteractiveComplexHeatmapOutput())
+                         #possible addition of choice by publication
+                       ),
+                
+                box(width = 9, title = "TCR-pMHC binding activity", status = 'primary', solidHeader = T,
+                  InteractiveComplexHeatmapOutput())
+        )
       ),
       
       tabItem(tabName = 'alluvium', 
               h1('Alluvium plot showing TCR-pMHC bindings'),
+              
               fluidRow(
-                box(selectizeInput('peptide', 'Peptide',
+                box(width = 5, title = "Settings", status = 'info', solidHeader = T,
+                    selectizeInput('peptide2', 'Peptide',
                       choices = unique(TCR_epitope$index_name)),
                  
                  sliderInput('activity', "normalized binding activity range", value = c(0.5, 1), 
                              min = 0, max = 1, step = 0.005)
-                )),
-                box(plotlyOutput("plot5", inline = FALSE))
+                )
+              ),
+                fluidRow(
+                  box(width = 9, title = "TCR-pMHC binding", status = 'primary', solidHeader = T,
+                  plotlyOutput("plot5"))
               )
+      )
     )
   )
 ))
+
 
 ##create shiny server
 
@@ -196,7 +224,7 @@ server <- shinyServer(function(input, output, session){
   ##Heatmap code
   #Subset original df, only use columns of interest, make it into wide df format
   
-  epitope_sub <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide, ]})
+  epitope_sub <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide1, ]})
   
   smaller_epitope_sub <- reactive({epitope_sub()[ , c('peptide', "tcr_name", 
                                                       "normalized_activity", "position")]})
@@ -220,6 +248,7 @@ server <- shinyServer(function(input, output, session){
   row_split <- reactive({wide_epitope_sub()[ ,1]})
   sub_df <- reactive({as.matrix(wide_epitope_sub()[, 2:ncol(wide_epitope_sub())])})
   
+  
   observe ({
     
     ht1 = Heatmap(
@@ -239,14 +268,14 @@ server <- shinyServer(function(input, output, session){
   
   ##Alluvium plot code
   
-  TCR_epitope_peptide <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide, ] %>%
+  TCR_epitope_peptide <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide2, ] %>%
       dplyr::filter((between(normalized_activity, 
                              input$activity[1], input$activity[2])))
   })
   
   output$plot5 <- renderPlotly({
     
-    if (nrow(TCR_epitope_peptide()) == 0) {
+    if (sum(TCR_epitope_peptide()$normalized_activity) == 0) {
       ggplot() +
         theme_void() +
         theme(axis.line = element_blank()) +
@@ -254,7 +283,7 @@ server <- shinyServer(function(input, output, session){
       
     } else {
       
-      plot_5 <- ggplot(data = TCR_epitope_peptide(),
+      plot_5.1 <- ggplot(data = TCR_epitope_peptide(),
                        aes(axis1 = tcr_name, axis2 = peptide, y = normalized_activity)) +
         geom_alluvium(aes(fill = tcr_name), curve_type = "cubic") +
         geom_stratum(aes(fill = tcr_name)) +
@@ -265,7 +294,7 @@ server <- shinyServer(function(input, output, session){
         theme_void() +
         guides(fill = guide_legend(title = "TCRs"))
       
-      ggplotly(plot_5, height = 750, width = 1000)
+      ggplotly(plot_5.1)
     }
     
   })
