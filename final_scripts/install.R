@@ -1,0 +1,3 @@
+.libPaths(c("/usr/lib64/R/library","/usr/share/R/library"))
+
+install.packages(c('ggplot2','tidyverse', 'plotly', 'ggalluvial'), repos='http://cran.us.r-project.org')
