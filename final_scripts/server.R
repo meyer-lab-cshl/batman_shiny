@@ -15,7 +15,7 @@ library(circlize)
 library(igraph)
 
 # load dataframe for TCR distances and epitope binding information
-TCR_epitope <- read.csv("TCR_Epitope_activity_updated.csv")
+TCR_epitope <- read_xlsx("TCR_epitope_database.xlsx")
 dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 
 ##create shiny server
@@ -74,7 +74,7 @@ server <- shinyServer(function(input, output, session){
   coordinates <- reactive({as.data.frame(generate_epitope_coordinates(peptide(), 
                                                                       input$dist_method, weights()))})
   
-  activity <- reactive({TCR_epitope$normalized_activity[TCR_epitope$tcr_name == 
+  activity <- reactive({TCR_epitope$normalized_peptide_activity[TCR_epitope$tcr_name == 
                                                        input$TCR_names]})
   
   plot_df <- reactive({cbind(coordinates(), activity(), peptide())})
@@ -84,7 +84,7 @@ server <- shinyServer(function(input, output, session){
     ggplot(plot_df(), aes(V1 , V2)) + 
       geom_point(alpha = 0.8, size = 2, aes(color = plot_df()$activity, 
                                             label = plot_df()$peptide)) +
-      scale_colour_gradient(low = "grey", high = "red") +
+      scale_colour_viridis_c(option = "plasma") +
       labs(color = 'normalized binding activity') +
       theme_minimal() + 
       theme(
@@ -106,22 +106,23 @@ server <- shinyServer(function(input, output, session){
   ##Heatmap code
   #Subset original df, only use columns of interest, make it into wide df format
   
-  epitope_sub <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide1, ]})
+  epitope_sub <- reactive({TCR_epitope[TCR_epitope$index_peptide == input$peptide1, ]})
   
   smaller_epitope_sub <- reactive({epitope_sub()[ , c('peptide', "tcr_name", 
-                                                      "normalized_activity", "position")]})
+                                                      "normalized_peptide_activity", "position")]})
   
   wide_epitope_sub <- reactive({pivot_wider(smaller_epitope_sub(), 
                                             id_cols = c("peptide", "position"),
                                             names_from = "tcr_name", 
-                                            values_from = "normalized_activity") %>%
+                                            values_from = "normalized_peptide_activity") %>%
       column_to_rownames(., var = 'peptide')}) #set peptides as row IDs
   
   
   #Set color squeme
-  col_fun = reactive({colorRamp2(c(min(smaller_epitope_sub()$normalized_activity),
-                                   max(smaller_epitope_sub()$normalized_activity)), 
-                                 c("white", "red"))})
+  col_fun = reactive({colorRamp2(c(min(smaller_epitope_sub()$normalized_peptide_activity),
+                                   mean(smaller_epitope_sub()$normalized_peptide_activity),
+                                   max(smaller_epitope_sub()$normalized_peptide_activity)), 
+                                 c("#0D0887FF", "#CC4678FF", "#F0F921FF"))})
   
   
   
@@ -150,14 +151,14 @@ server <- shinyServer(function(input, output, session){
   
   ##Alluvium plot code
   
-  TCR_epitope_peptide <- reactive({TCR_epitope[TCR_epitope$index_name == input$peptide2, ] %>%
-      dplyr::filter((between(normalized_activity, 
+  TCR_epitope_peptide <- reactive({TCR_epitope[TCR_epitope$index_peptide == input$peptide2, ] %>%
+      dplyr::filter((between(normalized_peptide_activity, 
                              input$activity[1], input$activity[2])))
   })
   
   output$plot5 <- renderPlotly({
     
-    if (sum(TCR_epitope_peptide()$normalized_activity) == 0) {
+    if (sum(TCR_epitope_peptide()$normalized_peptide_activity) == 0) {
       ggplot() +
         theme_void() +
         theme(axis.line = element_blank()) +
@@ -166,7 +167,7 @@ server <- shinyServer(function(input, output, session){
     } else {
       
       plot_5.1 <- ggplot(data = TCR_epitope_peptide(),
-                         aes(axis1 = tcr_name, axis2 = peptide, y = normalized_activity)) +
+                         aes(axis1 = tcr_name, axis2 = peptide, y = normalized_peptide_activity)) +
         geom_alluvium(aes(fill = tcr_name), curve_type = "cubic") +
         geom_stratum(aes(fill = tcr_name)) +
         geom_text(stat = "stratum",

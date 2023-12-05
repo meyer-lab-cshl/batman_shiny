@@ -14,7 +14,7 @@ library(circlize)
 library(igraph)
 
 # load dataframe for TCR distances and epitope binding information
-TCR_epitope <- read.csv("TCR_Epitope_activity_updated.csv")
+TCR_epitope <- read_xlsx("TCR_epitope_database.xlsx")
 dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 
 
@@ -23,7 +23,7 @@ dist_met <- c("BLOSUM100", "Dayhoff", "Gonnet", "Hamming", "PAM10")
 
 ## Create dashboard ####
 ui <- shinyUI(
-  dashboardPage(
+  dashboardPage(skin = "purple",
     dashboardHeader(title = 'TCR-pMHC Binding'),
     dashboardSidebar( width = 250,
                       sidebarMenu(
@@ -130,7 +130,7 @@ ui <- shinyUI(
                 fluidRow(
                   box(width = 5, title = "Settings", status = 'info', solidHeader = T,
                       selectizeInput('peptide1', 'Peptide',
-                                     choices = unique(TCR_epitope$index_name))
+                                     choices = unique(TCR_epitope$index_peptide))
                       #possible addition of choice by publication
                   ),
                   
@@ -145,7 +145,7 @@ ui <- shinyUI(
                 fluidRow(
                   box(width = 5, title = "Settings", status = 'info', solidHeader = T,
                       selectizeInput('peptide2', 'Peptide',
-                                     choices = unique(TCR_epitope$index_name)),
+                                     choices = unique(TCR_epitope$index_peptide)),
                       
                       sliderInput('activity', "normalized binding activity range", value = c(0.5, 1), 
                                   min = 0, max = 1, step = 0.005)
