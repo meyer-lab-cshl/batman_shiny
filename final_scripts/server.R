@@ -5,8 +5,10 @@
 library(plotly)
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(readxl)
 library(ggplot2)
+library(viridis)
 library(ggalluvial)
 library(dplyr)
 library(tidyverse)
@@ -119,10 +121,11 @@ server <- shinyServer(function(input, output, session){
   
   
   #Set color squeme
-  col_fun = reactive({colorRamp2(c(min(smaller_epitope_sub()$normalized_peptide_activity),
-                                   mean(smaller_epitope_sub()$normalized_peptide_activity),
-                                   max(smaller_epitope_sub()$normalized_peptide_activity)), 
-                                 c("#0D0887FF", "#CC4678FF", "#F0F921FF"))})
+  col_fun = reactive({colorRamp2(c(quantile(smaller_epitope_sub()$normalized_peptide_activity,
+                                            probs = seq(0, 1, 1/10))), 
+                                 c("#0D0887FF", "#42049EFF", "#6A00A8FF", "#900DA4FF", "#B12A90FF",
+                                   "#CC4678FF" ,"#E16462FF", "#F1844BFF", "#FCA636FF", "#FCCE25FF",
+                                   "#F0F921FF"))})
   
   
   
