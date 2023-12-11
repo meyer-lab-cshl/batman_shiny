@@ -114,52 +114,12 @@ ui <- shinyUI(
                       selectizeInput('TCR_names', 'TCR',
                                      choices = unique(TCR_epitope$tcr_name))
                   ),
+                
+                      
+                  #Sliders for position weights
+                  uiOutput("weights")
                   
-                  box(width = 9, title = "Position weights", status = 'info', solidHeader = T,
-                      
-                      div(style="display:inline-block", noUiSliderInput("obs1", "P1",
-                                  min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                  width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs2", "P2",
-                                  min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                  width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs3", "P3",
-                                  min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                  width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs4", "P4",
-                                  min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                  width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs5", "P5",
-                                  min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                  width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      
-                      div(style="display:inline-block", noUiSliderInput("obs6", "P6",
-                                      min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                      width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs7", "P7",
-                                      min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                      width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block",noUiSliderInput("obs8", "P8",
-                                      min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                      width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs9", "P9",
-                                      min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                      width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                      div(style="display:inline-block", noUiSliderInput("obs10", "P10",
-                                      min = 0, max = 1, value = 0.5, step=0.1, orientation = 'vertical',
-                                      width = '75px', height = '100px', color = '#0d0887',
-                      )),
-                  )
-                ),
+                  ),
                 
                 fluidRow(
                   box(width = 12, title = "Peptide Distances", status = 'primary', solidHeader = T,

@@ -66,11 +66,131 @@ server <- shinyServer(function(input, output, session){
     return(epitope_coordinates)
   }
   
-  peptide_length<-reactive({length(unlist(strsplit(peptide(), split = "")))/length(peptide())})
+  peptide_length <- reactive({length(unlist(strsplit(peptide(), split = "")))/length(peptide())})
+  
+  #insert Peptide weight slider
+  output$weights <- renderUI({
+    
+    box(width = 9, title = "Position weights", status = 'info', solidHeader = T,
+        
+        div(style="display:inline-block", noUiSliderInput("obs1", "P1",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical', direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs2", "P2",
+                                                          min = 0, max = 1, value = 0.5, step=0.1,
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs3", "P3",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs4", "P4",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs5", "P5",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs6", "P6",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block", noUiSliderInput("obs7", "P7",
+                                                          min = 0, max = 1, value = 0.5, step=0.1, 
+                                                          orientation = 'vertical',  direction = "rtl",
+                                                          width = '75px', height = '100px', 
+                                                          color = '#0d0887',
+        )),
+        
+        div(style="display:inline-block",noUiSliderInput("obs8", "P8",
+                                                         min = 0, max = 1, value = 0.5, step=0.1, 
+                                                         orientation = 'vertical',  direction = "rtl",
+                                                         width = '75px', height = '100px', 
+                                                         color = '#0d0887',
+        )),
+        
+        ##additional sliders for longer peptides
+        
+        if (peptide_length() >= 9) {
+          div(style="display:inline-block", noUiSliderInput("obs9", "P9",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+        
+        if (peptide_length() >= 10) {
+          
+          div(style="display:inline-block", noUiSliderInput("obs10", "P10",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+        
+        if (peptide_length() >= 11) {
+          
+          div(style="display:inline-block", noUiSliderInput("obs11", "P11",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+        
+        if (peptide_length() >= 12) {
+          
+          div(style="display:inline-block", noUiSliderInput("obs12", "P12",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+        
+        if (peptide_length() >= 13) {
+          
+          div(style="display:inline-block", noUiSliderInput("obs13", "P13",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+        
+        if (peptide_length() >= 14) {
+          
+          div(style="display:inline-block", noUiSliderInput("obs14", "P14",
+                                                            min = 0, max = 1, value = 0.5, step=0.1, 
+                                                            orientation = 'vertical',  direction = "rtl",
+                                                            width = '75px', height = '100px', 
+                                                            color = '#0d0887',
+          )) },
+    )
+    
+  })
   
   weights <- reactive({
     array(c(input$obs1, input$obs2, input$obs3, input$obs4, input$obs5, input$obs6, 
-            input$obs7, input$obs8, input$obs9, input$obs10),
+            input$obs7, input$obs8, input$obs9, input$obs10, input$obs11, input$obs12, 
+            input$obs13, input$obs14),
           dim = c(peptide_length(),1))})
   
   coordinates <- reactive({as.data.frame(generate_epitope_coordinates(peptide(), 
@@ -80,6 +200,7 @@ server <- shinyServer(function(input, output, session){
                                                        input$TCR_names]})
   
   plot_df <- reactive({cbind(coordinates(), activity(), peptide())})
+  
   
   output$plot3.1 <- renderPlotly({
     
@@ -134,7 +255,7 @@ server <- shinyServer(function(input, output, session){
   
   row_split <- reactive({wide_epitope_sub()[ ,1]})
   sub_df <- reactive({as.matrix(wide_epitope_sub()[, 2:ncol(wide_epitope_sub())])})
-  
+
   
   observe ({
     
